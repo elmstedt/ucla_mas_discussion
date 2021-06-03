@@ -1,0 +1,36 @@
+---
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(gt)
+set.seed(123)
+dat <- data.frame(g1 = sample(letters[1:3], 200, TRUE),
+                  g2 = sample(letters[1:2], 200, TRUE),
+                  x  = runif(200))
+
+
+dat %>%
+  group_by(g2, g1) %>%
+  summarise(mean = mean(x)) %>%
+  
+gt() %>%
+  summary_rows(groups = TRUE,
+               columns = mean,
+               fns = list(average = "mean")) ->
+  data
+```
+
+```{r}
+# str(data)
+# writeLines(gt::as_latex(data))
+# writeLines(gt::as_raw_html(data))
+data
+```
+
+

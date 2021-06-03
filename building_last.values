@@ -1,0 +1,103 @@
+#' Desired behaviour
+#' .Last.value      Return the last value
+#' .Last.value(n)   Return the nth last value
+#' .Last.value <- x Prepend x to the list of last values
+#'
+
+
+# template
+
+# Using local() to make functions with a memory
+detach(".Last.value")
+.last.values <- local({
+  # persistent variables
+  lvs <- list2DF(list(time  = character(),
+                      call  = character(),
+                      value = list()))
+  function(...) {
+    if (missing(..1)) {
+      structure(function(...) {
+        if (missing(..1)) {
+          lvs[[1]]
+        } else {
+          lvs[[..1]]
+        }
+      }, class = "last.value")
+    } else {
+      # lvs <<- c(..1, lvs)
+    }
+  }
+})
+
+# custom print method for .last.values function
+attach(new.env(), name = ".Last.value")
+assign("print.last.value",
+       function(x) {
+         print.default(.Last.value(1))
+         # as.environment("package:base")$.Last.value
+       },
+       as.environment(".Last.value")
+       # .GlobalEnv
+       )
+makeActiveBinding(".Last.value",
+                  local({
+                    # persistent variables
+                    lvs <- list2DF(list(time  = character(),
+                                        call  = character(),
+                                        value = list()))
+                    function(...) {
+
+                      if (missing(..1)) {
+                        structure(function(...) {
+                          if (missing(..1)) {
+                            lvs
+                          } else {
+                            if (..1 == 0) {
+                              lvs
+                            } else {
+                              if (missing(..2)) {
+                                lvs[..1, "value"]
+                              } else {
+                                lvs[..1, ]
+                              }
+                            }
+                          }
+                        }, class = "last.value")
+                      } else {
+                        lvs <<- rbind(..1, lvs)
+                      }
+                    }
+                  }),
+                  as.environment(".Last.value"))
+
+
+
+assign(".save_value",
+       function(...) {
+         if (exists(".Last.value")) {
+           n <- getOption("max_last_n", 10)
+           call  <- paste(format(..1), collapse = "\n")
+           if (length(call) && call != ".Last.value" && !is.null(..2)) {
+             e <- as.environment(".Last.value")
+             e$.Last.value <- list2DF(list(time  = Sys.time(),
+                                           call  = call,
+                                           value = list(..2)))
+
+             # .Last.value <- rbind(,
+             #                       .Last.value)
+             # assign("lvs",
+             #        .Last.values[seq_len(pmin(nrow(.Last.values), n)), ],
+             #        envir = as.environment(".Last.values"))
+           }
+         } else {
+           if (!any(search() == ".Last.values")) {
+             removeTaskCallback("lastcall")
+           } else {
+             .init_last_values()
+             Recall(...)
+           }
+         }
+         invisible(TRUE)
+       },
+       envir = as.environment(".Last.values"))
+invisible(addTaskCallback(.save_value, name = "lastcall"))

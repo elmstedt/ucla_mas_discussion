@@ -1,0 +1,10 @@
+OSX
+In a terminal run:
+cd /Library/Frameworks/R.framework/Resources/lib
+
+ln -sf  /System/Library/Frameworks/Accelerate.framework/Frameworks/vecLib.framework/Versions/Current/libBLAS.dylib libRblas.dylib
+
+Windows
+Download MRO from https://mran.microsoft.com/download
+Install MRO
+

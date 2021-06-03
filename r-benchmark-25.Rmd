@@ -1,0 +1,36 @@
+---
+title: "R Benchmark 25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, comment = "")
+# library(benchmarkme)
+library(dplyr)
+library(gt)
+```
+
+```{r}
+base <- readRDS("bm_base.RData")
+mkl <- readRDS("bm_mkl.RData")
+base <- base[-(1:2)]
+mkl <- mkl[-(1:2)]
+names(base)[[1]] <- "elapsed_base"
+names(mkl)[[1]] <- "elapsed_mkl"
+bm <- merge(base, mkl, all = TRUE)
+bm %>%
+  group_by(test_group, test) %>%
+  summarise(base = mean(elapsed_base),
+            # sd_base = sd(elapsed_base),
+            mkl = mean(elapsed_mkl),
+            # sd_mkl = sd(elapsed_mkl),
+            .groups = "drop") %>%
+  gt(groupname_col = "test_group",
+     rowname_col = "test") %>%
+  fmt_number(everything(), decimals = 3) %>%
+  summary_rows(groups = TRUE,
+               columns = c(base, mkl),
+               fns = list(total = "sum", mean = "mean")) %>%
+  grand_summary_rows(columns = c(base, mkl),
+                     fns = list(total = "sum", mean = "mean"))
+```

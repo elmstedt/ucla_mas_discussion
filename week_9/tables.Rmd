@@ -1,0 +1,39 @@
+---
+title: "Untitled"
+author: "Jake Elmstedt"
+date: "5/26/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r}
+library(gt)
+library(tidyverse)
+library(glue)
+library(pander)
+library(kableExtra)
+```
+
+```{r}
+# kableExtra
+# pander
+# DT
+# stargazer
+start_date <- "2010-06-07"
+end_date <- "2010-06-14"
+sp500 %>%
+  filter(date >= start_date & date <= end_date) %>%
+  select(-adj_close) ->
+  dat
+
+dat
+pander(dat)
+
+gt(dat)
+dat <- as.data.frame(dat)
+kable(dat)
+```
+
